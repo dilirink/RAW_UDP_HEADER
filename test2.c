@@ -9,15 +9,15 @@
   
 #define PORT     8081 
 #define MAXLINE 1024 
-  
-
+#define SERV_IP "127.0.0.1"  
+// Driver code 
 int main() { 
     int sockfd; 
     char buffer[MAXLINE]; 
-    char hello[] = "Hello from client ^-^"; 
+    char *hello = "Hello from client"; 
     struct sockaddr_in     servaddr; 
   
-
+    // Creating socket file descriptor 
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
         perror("socket creation failed"); 
         exit(EXIT_FAILURE); 
@@ -25,28 +25,24 @@ int main() {
   
     memset(&servaddr, 0, sizeof(servaddr)); 
       
-    
+    // Filling server information 
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(PORT); 
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
-
-     if ( bind(sockfd, (const struct sockaddr *)&servaddr,  
-            sizeof(servaddr)) < 0 ) 
-    { 
-        perror("bind failed"); 
-        exit(EXIT_FAILURE); 
-    } 
-
+    servaddr.sin_addr.s_addr = inet_addr(SERV_IP);
+      
     int n, len; 
-         
-    n = recvfrom(sockfd, (char *)buffer, sizeof(buffer),  0, (struct sockaddr *) &servaddr, 
+      
+    sendto(sockfd, (const char *)hello, strlen(hello), 
+        MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
+            sizeof(servaddr)); 
+    printf("Hello message sent.\n"); 
+          
+    n = recvfrom(sockfd, (char *)buffer, MAXLINE,  
+                MSG_WAITALL, (struct sockaddr *) &servaddr, 
                 &len); 
     buffer[n] = '\0'; 
     printf("Server : %s\n", buffer); 
-    len = sizeof(struct sockaddr_in);
-    sendto(sockfd, hello, sizeof(hello), 0, (const struct sockaddr *) &servaddr,  len); 
-    printf("Hello message sent.\n"); 
-
+  
     close(sockfd); 
     return 0; 
 } 

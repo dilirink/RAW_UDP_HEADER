@@ -1,3 +1,0 @@
-# coments
-PORT 8081
-PATH www/index.html
